@@ -5,7 +5,8 @@ export type EventType =
   | "project.updated"
   | "application.status_changed"
   | "match.requested"
-  | "team.started";
+  | "team.started"
+  | "milestone.reminder";
 
 export interface NormalizedEvent {
   id: string;
@@ -17,6 +18,9 @@ export interface NormalizedEvent {
   applicationId?: string;
   status?: string;
   message?: string;
+  meetingStartIso?: string;
+  meetingEndIso?: string;
+  calendarConflict?: boolean;
   raw: unknown;
 }
 

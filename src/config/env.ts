@@ -12,7 +12,16 @@ const envSchema = z.object({
   DISCORD_BOT_TOKEN: z.string().optional(),
   DISCORD_APPLICATION_ID: z.string().optional(),
   DISCORD_GUILD_ID: z.string().optional(),
-  DISCORD_ALERTS_CHANNEL_ID: z.string().optional()
+  DISCORD_ALERTS_CHANNEL_ID: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_REDIRECT_URI: z.string().optional(),
+  GOOGLE_REFRESH_TOKEN: z.string().optional(),
+  GMAIL_QUERY: z.string().default("from:riipen newer_than:7d"),
+  GMAIL_POLL_INTERVAL_MS: z.coerce.number().default(60000),
+  GOOGLE_CALENDAR_ID: z.string().default("primary"),
+  MILESTONE_REMINDER_INTERVAL_MS: z.coerce.number().default(6 * 60 * 60 * 1000),
+  MILESTONE_REMINDER_CHECK_MS: z.coerce.number().default(5 * 60 * 1000)
 });
 
 export const env = envSchema.parse(process.env);
