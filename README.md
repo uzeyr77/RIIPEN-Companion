@@ -12,6 +12,20 @@ It watches Gmail for Riipen notifications, posts readable updates to Discord, ch
 - Milestone reminders continue until completion is detected or confirmed
 - SQLite persistence prevents duplicate/replayed notifications
 
+## Usage Model (You + Others)
+
+This project is designed for a **single public code repository** and **many private deployments**:
+
+- You can use this same repo for your own personal companion.
+- Others can fork/clone this repo and run their own companion instance.
+- Each deployment owner configures their own credentials in `.env` (or Railway variables).
+- No one needs to share Google/Discord tokens with anyone else.
+
+In short:
+- **One codebase**
+- **Many self-hosted instances**
+- **Each user owns their own data and secrets**
+
 ## Tech Stack
 
 - Node.js + TypeScript
@@ -86,3 +100,10 @@ Health endpoint:
   - `pm2 start npm --name riipen-companion -- start`
   - `pm2 save`
   - `pm2 startup`
+
+## Recommended Workflow
+
+1. Keep this repository as your public template/codebase.
+2. Use it yourself locally or via your own private Railway deployment.
+3. Let others fork/clone and deploy their own copy.
+4. Never commit or share real secrets (`.env` stays local/private).
