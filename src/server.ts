@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import express from "express";
 import { env } from "./config/env";
-import { DiscordBridgeBot } from "./integrations/discord/bot";
+import { DiscordBridgeBot, ThreadReplyContext } from "./integrations/discord/bot";
 import { GoogleCalendarService } from "./integrations/google/calendar";
 import { requestContext } from "./middleware/requestContext";
 import { logger } from "./observability/logger";
@@ -22,8 +22,22 @@ app.use(
     }
   })
 );
-
 app.use(requestContext);
+
+app.get("/", (_req, res) => {
+  res.type("html").send(`
+    <h1>Riipen Companion (Self-Hosted)</h1>
+    <p>This deployment is single-user and runs autonomously for the owner of this instance.</p>
+    <p>Configure values in your <code>.env</code> file and keep this process running.</p>
+    <ul>
+      <li><code>DISCORD_ALERTS_CHANNEL_ID</code></li>
+      <li><code>GOOGLE_REFRESH_TOKEN</code></li>
+      <li><code>GMAIL_QUERY</code></li>
+    </ul>
+    <p>Health: <a href="/health">/health</a></p>
+    <p>Status: <a href="/status">/status</a></p>
+  `);
+});
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/webhooks/riipen", riipenWebhookRouter);
@@ -32,7 +46,7 @@ app.use("/status", statusRouter);
 const bot = new DiscordBridgeBot();
 const calendarService = new GoogleCalendarService();
 
-void bot.start(async (message, conversationId) => {
+void bot.start(async (message, context: ThreadReplyContext) => {
   const text = message.content.trim();
 
   if (text.startsWith("!complete-milestone ")) {
@@ -69,8 +83,13 @@ void bot.start(async (message, conversationId) => {
       return;
     }
 
+    if (!env.GOOGLE_REFRESH_TOKEN) {
+      await message.reply("GOOGLE_REFRESH_TOKEN is missing in environment settings.");
+      return;
+    }
+
     const endDate = new Date(startDate.getTime() + minutes * 60 * 1000);
-    const availability = await calendarService.isSlotFree(startDate.toISOString(), endDate.toISOString());
+    const availability = await calendarService.isSlotFree(startDate.toISOString(), endDate.toISOString(), env.GOOGLE_REFRESH_TOKEN);
 
     if (!availability.ok) {
       await message.reply(`Could not check calendar availability: ${availability.error}`);
@@ -82,12 +101,15 @@ void bot.start(async (message, conversationId) => {
       return;
     }
 
-    const result = await calendarService.createEvent({
-      title,
-      description: `Created from Discord thread ${message.channelId}`,
-      startIso: startDate.toISOString(),
-      endIso: endDate.toISOString()
-    });
+    const result = await calendarService.createEvent(
+      {
+        title,
+        description: `Created from Discord channel ${message.channelId}`,
+        startIso: startDate.toISOString(),
+        endIso: endDate.toISOString()
+      },
+      env.GOOGLE_REFRESH_TOKEN
+    );
 
     if (!result.ok) {
       await message.reply(`Calendar creation failed: ${result.error}`);
@@ -98,9 +120,14 @@ void bot.start(async (message, conversationId) => {
     return;
   }
 
+  if (!context.conversationId) {
+    await message.reply("Command not recognized. Use `!create-meeting ...` or `!complete-milestone <Event ID>`.");
+    return;
+  }
+
   messageBridge.enqueue({
     id: crypto.randomUUID(),
-    conversationId,
+    conversationId: context.conversationId,
     sourceDiscordMessageId: message.id,
     body: message.content
   });
@@ -113,8 +140,7 @@ startGmailPollWorker(bot, env.GMAIL_POLL_INTERVAL_MS);
 startMilestoneReminderWorker(bot, env.MILESTONE_REMINDER_CHECK_MS, env.MILESTONE_REMINDER_INTERVAL_MS);
 
 app.listen(env.PORT, () => {
-  logger.info({ port: env.PORT }, "riipen companion server started");
+  logger.info({ port: env.PORT, mode: "self-hosted-single-user" }, "riipen companion server started");
 });
 
 export { app };
-

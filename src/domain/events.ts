@@ -10,6 +10,7 @@ export type EventType =
 
 export interface NormalizedEvent {
   id: string;
+  userId?: string;
   type: EventType;
   timestamp: string;
   actorRole?: "student" | "employer" | "system";

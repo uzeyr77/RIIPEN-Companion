@@ -28,7 +28,7 @@ Example:
 - `from:(no-reply@riipen.com OR notifications@riipen.com) newer_than:7d`
 
 ## 4) Discord calendar command
-In a synced thread, run:
+In your configured alerts channel, run:
 `!create-meeting startIso|durationMinutes|title`
 
 Example:
@@ -43,7 +43,7 @@ The bot never auto-books meetings from incoming employer/co-worker messages.
 ## 5) Milestone reminders with guardrails
 - Milestone/deadline emails are posted as `milestone.reminder`.
 - If you do not confirm completion, reminders continue on an interval.
-- Mark done in the related thread:
+- Mark done in the alerts channel:
   - `!complete-milestone <Event ID>`
   - Event ID is included in each Discord notification.
 
@@ -52,4 +52,9 @@ The bot never auto-books meetings from incoming employer/co-worker messages.
 2. `npm run dev`
 3. Confirm logs show server start and Discord readiness.
 4. Send a test Riipen-like email and check Discord thread output.
+
+## 7) Replay behavior
+- On first startup, the app sets a Gmail checkpoint to "now".
+- It will not replay historical inbox messages by default.
+- After that, only newly received emails are processed.
 

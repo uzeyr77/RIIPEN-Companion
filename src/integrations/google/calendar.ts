@@ -1,7 +1,7 @@
 import { google } from "googleapis";
 import { env } from "../../config/env";
 import { logger } from "../../observability/logger";
-import { getGoogleOAuthClient } from "./auth";
+import { createGoogleOAuthClient } from "./auth";
 
 export interface CalendarCreateInput {
   title: string;
@@ -17,23 +17,24 @@ export interface SlotCheckResult {
 }
 
 export class GoogleCalendarService {
-  async isSlotFree(startIso: string, endIso: string): Promise<SlotCheckResult> {
-    const auth = getGoogleOAuthClient();
+  async isSlotFree(startIso: string, endIso: string, refreshToken?: string, calendarId?: string): Promise<SlotCheckResult> {
+    const auth = createGoogleOAuthClient(refreshToken ?? env.GOOGLE_REFRESH_TOKEN);
     if (!auth) {
       return { ok: false, error: "Missing Google OAuth credentials" };
     }
 
     try {
       const calendar = google.calendar({ version: "v3", auth });
+      const effectiveCalendarId = calendarId ?? env.GOOGLE_CALENDAR_ID;
       const response = await calendar.freebusy.query({
         requestBody: {
           timeMin: startIso,
           timeMax: endIso,
-          items: [{ id: env.GOOGLE_CALENDAR_ID }]
+          items: [{ id: effectiveCalendarId }]
         }
       });
 
-      const busy = response.data.calendars?.[env.GOOGLE_CALENDAR_ID]?.busy ?? [];
+      const busy = response.data.calendars?.[effectiveCalendarId]?.busy ?? [];
       return { ok: true, isFree: busy.length === 0 };
     } catch (error) {
       logger.error({ error }, "failed to check calendar availability");
@@ -41,16 +42,21 @@ export class GoogleCalendarService {
     }
   }
 
-  async createEvent(input: CalendarCreateInput): Promise<{ ok: boolean; htmlLink?: string; error?: string }> {
-    const auth = getGoogleOAuthClient();
+  async createEvent(
+    input: CalendarCreateInput,
+    refreshToken?: string,
+    calendarId?: string
+  ): Promise<{ ok: boolean; htmlLink?: string; error?: string }> {
+    const auth = createGoogleOAuthClient(refreshToken ?? env.GOOGLE_REFRESH_TOKEN);
     if (!auth) {
       return { ok: false, error: "Missing Google OAuth credentials" };
     }
 
     try {
       const calendar = google.calendar({ version: "v3", auth });
+      const effectiveCalendarId = calendarId ?? env.GOOGLE_CALENDAR_ID;
       const response = await calendar.events.insert({
-        calendarId: env.GOOGLE_CALENDAR_ID,
+        calendarId: effectiveCalendarId,
         requestBody: {
           summary: input.title,
           description: input.description,

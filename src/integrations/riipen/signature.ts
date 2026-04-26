@@ -12,7 +12,6 @@ export function verifyRiipenSignature(payload: string, expectedSignature: string
   const actual = computeSignature(payload, secret);
   const expectedBuffer = Buffer.from(expectedSignature, "utf8");
   const actualBuffer = Buffer.from(actual, "utf8");
-
   if (expectedBuffer.length !== actualBuffer.length) {
     return false;
   }

@@ -1,8 +1,8 @@
 import { google } from "googleapis";
 import { env } from "../../config/env";
 
-export function getGoogleOAuthClient() {
-  if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !env.GOOGLE_REFRESH_TOKEN) {
+export function createGoogleOAuthClient(refreshToken?: string) {
+  if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
     return null;
   }
 
@@ -12,6 +12,8 @@ export function getGoogleOAuthClient() {
     env.GOOGLE_REDIRECT_URI
   );
 
-  oauth2Client.setCredentials({ refresh_token: env.GOOGLE_REFRESH_TOKEN });
+  if (refreshToken) {
+    oauth2Client.setCredentials({ refresh_token: refreshToken });
+  }
   return oauth2Client;
 }

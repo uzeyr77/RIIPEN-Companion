@@ -1,4 +1,5 @@
 import { DiscordBridgeBot } from "../integrations/discord/bot";
+import { env } from "../config/env";
 import { logger } from "../observability/logger";
 import { messageRepo } from "../storage/repositories/messageRepo";
 
@@ -17,7 +18,7 @@ export function startMilestoneReminderWorker(
       };
 
       try {
-        await bot.publishRiipenEvent(reminderEvent);
+        await bot.publishRiipenEvent(reminderEvent, env.DISCORD_ALERTS_CHANNEL_ID);
         messageRepo.markMilestoneReminded(event.id);
       } catch (error) {
         logger.error({ error, eventId: event.id }, "failed to publish milestone reminder");

@@ -20,6 +20,7 @@ const envSchema = z.object({
   GMAIL_QUERY: z.string().default("from:riipen newer_than:7d"),
   GMAIL_POLL_INTERVAL_MS: z.coerce.number().default(60000),
   GOOGLE_CALENDAR_ID: z.string().default("primary"),
+  SQLITE_PATH: z.string().default("./data/riipen-companion.sqlite"),
   MILESTONE_REMINDER_INTERVAL_MS: z.coerce.number().default(6 * 60 * 60 * 1000),
   MILESTONE_REMINDER_CHECK_MS: z.coerce.number().default(5 * 60 * 1000)
 });

@@ -101,4 +101,18 @@ describe("emailToEventParser", () => {
     expect(event.meetingStartIso).toBeDefined();
     expect(event.meetingEndIso).toBeDefined();
   });
+
+  it("detects milestone completion emails", () => {
+    const event = parseRiipenEmailToEvent({
+      id: "abc130",
+      subject: "Milestone submission completed",
+      from: "team@riipen.com",
+      snippet: "You have completed the milestone Complete AI video interview for the project",
+      body: "Milestone submission Completed on April 3, 2026",
+      internalDate: String(Date.now())
+    });
+
+    expect(event.type).toBe("project.updated");
+    expect(event.status).toBe("milestone_completed");
+  });
 });

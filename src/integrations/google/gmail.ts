@@ -1,7 +1,6 @@
 import { gmail_v1, google } from "googleapis";
-import { env } from "../../config/env";
 import { logger } from "../../observability/logger";
-import { getGoogleOAuthClient } from "./auth";
+import { OAuth2Client } from "google-auth-library";
 
 export interface GmailRiipenEmail {
   id: string;
@@ -38,18 +37,13 @@ function extractBody(payload: gmail_v1.Schema$MessagePart | undefined): string {
 }
 
 export class GmailRiipenClient {
-  async pollRiipenEmails(): Promise<GmailRiipenEmail[]> {
-    const auth = getGoogleOAuthClient();
-    if (!auth) {
-      return [];
-    }
-
+  async pollRiipenEmails(auth: OAuth2Client, query: string, maxResults = 10): Promise<GmailRiipenEmail[]> {
     const gmail = google.gmail({ version: "v1", auth });
     try {
       const list = await gmail.users.messages.list({
         userId: "me",
-        q: env.GMAIL_QUERY,
-        maxResults: 10
+        q: query,
+        maxResults
       });
 
       const items = list.data.messages ?? [];

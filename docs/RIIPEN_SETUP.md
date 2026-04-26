@@ -1,13 +1,11 @@
 # Riipen Setup Guide
 
-## 1) Standard API mode (company/portal admins)
-1. Sign in at `app.riipen.com`.
-2. Open **Settings** for your company or portal.
-3. Go to **Advanced -> Keys**.
-4. Create a key pair and copy the secret key (`sk_...`).
-5. Put the secret in `.env` as `RIIPEN_SECRET_KEY`.
+## 1) Self-hosted model (default)
+- This deployment is designed for one owner per instance.
+- Each user runs their own copy and stores credentials in their own `.env`.
+- No centralized account system is required.
 
-## 2) Learner mode workaround (Gmail)
+## 2) Learner mode (Gmail-first)
 If you do not have access to Riipen API keys, use Gmail as your event source.
 Follow `docs/GMAIL_CALENDAR_SETUP.md` and configure:
 - Gmail polling (`GMAIL_QUERY`)
@@ -15,7 +13,14 @@ Follow `docs/GMAIL_CALENDAR_SETUP.md` and configure:
 - Discord target channel
 - Google Calendar event creation via `!create-meeting`
 
-## 3) Configure webhook endpoint (API mode only)
+## 3) Optional API mode (company/portal admins)
+1. Sign in at `app.riipen.com`.
+2. Open **Settings** for your company or portal.
+3. Go to **Advanced -> Keys**.
+4. Create a key pair and copy the secret key (`sk_...`).
+5. Put the secret in `.env` as `RIIPEN_SECRET_KEY`.
+
+If you also want webhook ingestion:
 1. Deploy this app to a public HTTPS URL.
 2. Add webhook URL: `https://<your-host>/webhooks/riipen`.
 3. Generate/store a webhook secret and set `RIIPEN_WEBHOOK_SECRET`.

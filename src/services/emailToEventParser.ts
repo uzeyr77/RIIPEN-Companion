@@ -4,6 +4,9 @@ import { GmailRiipenEmail } from "../integrations/google/gmail";
 
 function detectType(subject: string, body: string): NormalizedEvent["type"] {
   const text = `${subject} ${body}`.toLowerCase();
+  if (text.includes("have completed the milestone") || text.includes("milestone submission completed on")) {
+    return "project.updated";
+  }
   if (text.includes("announcement from") || text.includes("posted a new announcement")) {
     return "project.updated";
   }
@@ -25,6 +28,9 @@ function detectType(subject: string, body: string): NormalizedEvent["type"] {
 
 function extractStatus(subject: string, body: string): string | undefined {
   const text = `${subject} ${body}`.toLowerCase();
+  if (text.includes("have completed the milestone") || text.includes("milestone submission") && text.includes("completed on")) {
+    return "milestone_completed";
+  }
   if (text.includes("accepted")) {
     return "accepted";
   }
