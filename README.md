@@ -76,12 +76,13 @@ Health endpoint:
 
 ## Deploy (Always-On)
 
-- Railway: `docs/RAILWAY_DEPLOY.md`
-- PM2 local background: `docs/AUTOMATION.md`
+- Railway (recommended):
+  - Deploy the repo to Railway and set environment variables in Railway.
+  - Railway starts the app with `npm start` and keeps it running continuously.
+  - Users do **not** run `npm run dev` when deployed on Railway.
 
-## Additional Docs
-
-- Setup details: `docs/RIIPEN_SETUP.md`
-- Gmail/Calendar setup: `docs/GMAIL_CALENDAR_SETUP.md`
-- Operations: `docs/AUTOMATION.md`
-- Deeper architecture/design reference: `docs/ARCHITECTURE_INTERNAL.md`
+- Local always-on alternative (PM2):
+  - `npm run build`
+  - `pm2 start npm --name riipen-companion -- start`
+  - `pm2 save`
+  - `pm2 startup`
